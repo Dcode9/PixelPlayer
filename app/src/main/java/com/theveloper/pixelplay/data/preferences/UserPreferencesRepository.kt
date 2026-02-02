@@ -174,6 +174,9 @@ constructor(
         val TAP_BACKGROUND_CLOSES_PLAYER = booleanPreferencesKey("tap_background_closes_player")
         val IMMERSIVE_LYRICS_ENABLED = booleanPreferencesKey("immersive_lyrics_enabled")
         val IMMERSIVE_LYRICS_TIMEOUT = longPreferencesKey("immersive_lyrics_timeout")
+        
+        // Genre View Preference
+        val IS_GENRE_GRID_VIEW = booleanPreferencesKey("is_genre_grid_view")
     }
 
     val appRebrandDialogShownFlow: Flow<Boolean> =
@@ -602,6 +605,17 @@ constructor(
     suspend fun saveYourMixSongIds(songIds: List<String>) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.YOUR_MIX_SONG_IDS] = json.encodeToString(songIds)
+        }
+    }
+
+    val isGenreGridViewFlow: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.IS_GENRE_GRID_VIEW] ?: true // Default to Grid (true)
+        }
+
+    suspend fun setGenreGridView(isGrid: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_GENRE_GRID_VIEW] = isGrid
         }
     }
 

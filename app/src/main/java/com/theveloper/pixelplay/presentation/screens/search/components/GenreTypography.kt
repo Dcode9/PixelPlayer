@@ -25,9 +25,15 @@ object GenreTypography {
      * Note: This requires a variable font resource to be present in res/font/genre_variable.ttf
      */
 @OptIn(ExperimentalTextApi::class)
-    fun getGenreStyle(genreId: String): TextStyle {
+    fun getGenreStyle(genreId: String, genreName: String): TextStyle {
         val hash = abs(genreId.hashCode())
         val seed = hash % 100
+        
+        // Analyze Text Length for smart adjustments
+        val length = genreName.length
+        val wordCount = genreName.split(" ").size
+        val isLongText = length > 10 || wordCount > 2
+        val isVeryLongText = length > 16
 
         // Strategy Distribution:
         // 0-14: Original (Simple Bold) -> 15%
@@ -40,28 +46,41 @@ object GenreTypography {
                  TextStyle(
                     fontFamily = FontFamily.Default, 
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
+                    fontSize = if (isVeryLongText) 16.sp else if (isLongText) 18.sp else 20.sp
                 )
             }
             seed < 25 -> { // Monospace
                 TextStyle(
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 19.sp,
+                    fontSize = if (isVeryLongText) 15.sp else if (isLongText) 17.sp else 19.sp,
                     letterSpacing = (-0.5).sp // Tighter look for mono
                 )
             }
             seed < 65 -> { // Roboto Flex (Wild)
-                // Distinctive "Wild" look
-                // Weight: 200 (Thin) to 900 (Black)
-                val weightVal = 200 + (hash % 700) 
+                // Distinctive "Wild" look using multiple axes
                 
-                // Width: 50 (Condensed) to 150 (Expanded) - wider range for wildness
-                val widthVal = 60f + (hash % 90) 
+                // Weight: 300 to 900
+                val weightVal = 300 + (hash % 600) 
                 
-                // Slant: -10 (Backslant) to 0 (Upright) to 10 (Italic implicit? Slant is usually angle)
-                // Roboto Flex 'slnt' is usually -10 to 0. 
-                val slantVal = if (hash % 5 == 0) -10f else 0f
+                // Width: 70 to 120
+                // Smart Adjustment: Condense width for long text
+                val baseWidth = 70f + (hash % 50) 
+                val widthVal = if (isVeryLongText) baseWidth * 0.85f else if (isLongText) baseWidth * 0.9f else baseWidth
+                
+                // Slant: Mix of Upright (0), Slight Slant (-5), and Full Slant (-10)
+                val slantBucket = hash % 3
+                val slantVal = when (slantBucket) {
+                    0 -> 0f
+                    1 -> -5f
+                    else -> -10f
+                }
+                
+                // New Axes for texture and personality:
+                val gradeVal = -200 + (hash % 350)
+                val xtraVal = 400f + (hash % 200)
+                val yopqVal = 40f + (hash % 60)
+                val ytlcVal = 450f + (hash % 100)
 
                 val family = FontFamily(
                     Font(
@@ -69,51 +88,53 @@ object GenreTypography {
                         variationSettings = FontVariation.Settings(
                             FontVariation.weight(weightVal),
                             FontVariation.width(widthVal),
-                            FontVariation.slant(slantVal)
+                            FontVariation.slant(slantVal),
+                            FontVariation.grade(gradeVal),
+                            FontVariation.Setting("XTRA", xtraVal),
+                            FontVariation.Setting("YOPQ", yopqVal),
+                            FontVariation.Setting("YTLC", ytlcVal)
                         )
                     )
                 )
 
                 // Geometric Transform: "Crazy" scaleX
-                // Range: 0.8 to 1.6
-                val scaleXVal = 0.8f + ((hash % 8) / 10f)
+                // Range: 0.9 to 1.3
+                // Smart Adjustment: Tame scaleX for long text to avoid horizontal overflow
+                val baseScaleX = 0.9f + ((hash % 5) / 10f)
+                val scaleXVal = if (isVeryLongText) 0.95f else if (isLongText) 1.0f else baseScaleX
+
+                val baseFontSize = (22 + (hash % 10))
+                val finalFontSize = if (isVeryLongText) (baseFontSize * 0.75f) else if (isLongText) (baseFontSize * 0.85f) else baseFontSize.toFloat()
 
                 TextStyle(
                     fontFamily = family,
-                    fontWeight = FontWeight(weightVal), // Fallback
-                    fontSize = (22 + (hash % 12)).sp, // 22sp to 33sp
-                    letterSpacing = if (widthVal > 110) (-1).sp else 0.sp, // Tighten expanded text
+                    fontWeight = FontWeight(weightVal), 
+                    fontSize = finalFontSize.sp,
+                    letterSpacing = if (widthVal > 100) (-0.5).sp else 0.sp, 
                     textGeometricTransform = androidx.compose.ui.text.style.TextGeometricTransform(scaleX = scaleXVal)
                 )
             }
             else -> { // Google Sans Flex (Rounded/Expressive)
-                 // Assuming gflex_variable supports standard axes + potentially others.
-                 // We focus on the "Roundness" vibe here.
-                 
-                 val weightVal = 300 + (hash % 500) // 300-800
-                 // "ROND" axis might not be standard, but we'll try standard opsz/grade if available, 
-                 // or just rely on the font's character.
-                 
-                 // If the user said "permite redondez", it's likely inherent or controlled by weight/style.
-                 // We'll trust the font resource.
-                 
+                 val weightVal = 300 + (hash % 500) 
                  val family = FontFamily(
                     Font(
                         resId = R.font.gflex_variable,
                         variationSettings = FontVariation.Settings(
-                            FontVariation.weight(weightVal),
-                            // FontVariation.grade(0) // Standard grade
+                            FontVariation.weight(weightVal)
                         )
                     )
                  )
                  
-                 // ScaleX: slightly less wild than Roboto, closer to 1.0 but still expressive
-                 val scaleXVal = 0.9f + ((hash % 5) / 10f) // 0.9 to 1.3
+                 val baseScaleX = 0.9f + ((hash % 5) / 10f) 
+                 val scaleXVal = if (isVeryLongText) 0.95f else if (isLongText) 1.0f else baseScaleX
+                 
+                 val baseFontSize = (20 + (hash % 8))
+                 val finalFontSize = if (isVeryLongText) (baseFontSize * 0.8f) else if (isLongText) (baseFontSize * 0.9f) else baseFontSize.toFloat()
 
                  TextStyle(
                     fontFamily = family,
                     fontWeight = FontWeight(weightVal),
-                    fontSize = (20 + (hash % 8)).sp,
+                    fontSize = finalFontSize.sp,
                     textGeometricTransform = androidx.compose.ui.text.style.TextGeometricTransform(scaleX = scaleXVal)
                 )
             }

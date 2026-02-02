@@ -2757,14 +2757,35 @@ class PlayerViewModel @Inject constructor(
             }
         }
     }
+        // Custom Genres Names
+    val customGenres: StateFlow<Set<String>> = userPreferencesRepository.customGenresFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptySet()
+        )
 
-    val customGenres = userPreferencesRepository.customGenresFlow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
-        
-    val customGenreIcons = userPreferencesRepository.customGenreIconsFlow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+    val customGenreIcons: StateFlow<Map<String, Int>> = userPreferencesRepository.customGenreIconsFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
 
-    fun addCustomGenre(genre: String, iconResId: Int) {
+    val isGenreGridView: StateFlow<Boolean> = userPreferencesRepository.isGenreGridViewFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = true
+        )
+
+    fun toggleGenreViewMode() {
+        viewModelScope.launch {
+            userPreferencesRepository.setGenreGridView(!isGenreGridView.value)
+        }
+    }
+
+    fun addCustomGenre(genre: String, iconResId: Int? = null) {
         viewModelScope.launch {
             userPreferencesRepository.addCustomGenre(genre, iconResId)
         }
