@@ -26,6 +26,8 @@ Welcome to the PixelPlayer build documentation! This index helps you find the ri
 | ⚡ **Quick Lookup** | [QUICK_BUILD.md](QUICK_BUILD.md) | Know what to do, need command |
 | 📊 **Process Flow** | [BUILD_FLOW.md](BUILD_FLOW.md) | Understand the workflow |
 | 🔧 **Complete Ref** | [BUILD_APK.md](BUILD_APK.md) | Need all options/details |
+| 🚀 **Release Guide** | [RELEASE_GUIDE.md](RELEASE_GUIDE.md) | Creating official releases |
+| 🧪 **Test Releases** | [TESTING_RELEASE_SYSTEM.md](TESTING_RELEASE_SYSTEM.md) | Testing automated releases |
 | 🏠 **Project Info** | [README.md](README.md) | About PixelPlayer app |
 
 ## 🛠️ Build Tools

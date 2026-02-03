@@ -121,9 +121,19 @@
 - Android SDK 29+ (for building)
 - JDK 11+ (required)
 
-### Building APK
+### Download APK
 
-📦 **Want to build an APK?** Check out our comprehensive [BUILD_APK.md](BUILD_APK.md) guide!
+📥 **Download the latest APK directly from GitHub Releases:**
+
+👉 [**Get the latest release**](https://github.com/Dcode9/PixelPlayer/releases/latest)
+
+Choose between:
+- **Release APK** (recommended): Optimized for production use
+- **Debug APK**: For testing and debugging
+
+### Building APK from Source
+
+📦 **Want to build an APK yourself?** Check out our comprehensive [BUILD_APK.md](BUILD_APK.md) guide!
 
 **Quick build via command line:**
 ```sh
@@ -143,6 +153,8 @@ build-apk.bat debug      # Windows
 ```
 
 The APK will be at: `app/build/outputs/apk/debug/app-debug.apk`
+
+📚 For maintainers: See [RELEASE_GUIDE.md](RELEASE_GUIDE.md) for instructions on creating releases.
 
 ### Development Setup (Android Studio)
 
