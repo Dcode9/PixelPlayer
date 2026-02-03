@@ -46,7 +46,7 @@ python3 -c "import yaml; yaml.safe_load(open('.github/workflows/build-apk.yml'))
    
 3. **Run Workflow**
    - Click the "Run workflow" button
-   - Select the branch (e.g., `copilot/build-apk-file-release`)
+   - Select the branch you want to build from (e.g., `main`)
    - Click "Run workflow"
 
 4. **Monitor Progress**
@@ -94,7 +94,7 @@ git commit -m "Bump version to 0.5.1-beta"
 # 3. Create tag
 git tag -a v0.5.1-beta -m "Release version 0.5.1-beta"
 
-# 4. Push to GitHub
+# 4. Push to GitHub (replace 'main' with your branch name if different)
 git push origin main
 git push origin v0.5.1-beta
 ```

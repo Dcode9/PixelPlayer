@@ -110,8 +110,18 @@ fi
 
 # Update gradle.properties
 print_message "$BLUE" "📝 Updating gradle.properties..."
-sed -i "s/APP_VERSION_NAME=.*/APP_VERSION_NAME=$NEW_VERSION/" gradle.properties
-sed -i "s/APP_VERSION_CODE=.*/APP_VERSION_CODE=$NEW_VERSION_CODE/" gradle.properties
+
+# Cross-platform sed command
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    sed -i '' "s/APP_VERSION_NAME=.*/APP_VERSION_NAME=$NEW_VERSION/" gradle.properties
+    sed -i '' "s/APP_VERSION_CODE=.*/APP_VERSION_CODE=$NEW_VERSION_CODE/" gradle.properties
+else
+    # Linux and others
+    sed -i "s/APP_VERSION_NAME=.*/APP_VERSION_NAME=$NEW_VERSION/" gradle.properties
+    sed -i "s/APP_VERSION_CODE=.*/APP_VERSION_CODE=$NEW_VERSION_CODE/" gradle.properties
+fi
+
 print_message "$GREEN" "✅ Updated gradle.properties"
 
 # Commit the change
@@ -135,13 +145,13 @@ print_message "$BLUE" "  2. Push the tag $TAG_NAME"
 print_message "$BLUE" "  3. Trigger GitHub Actions to build and release APKs"
 echo ""
 
+# Get current branch early so it's available later
+CURRENT_BRANCH=$(git branch --show-current)
+
 read -p "$(echo -e ${YELLOW}Push to GitHub now? [y/N]:${NC} )" -n 1 -r
 echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     print_message "$BLUE" "📤 Pushing to GitHub..."
-    
-    # Get current branch
-    CURRENT_BRANCH=$(git branch --show-current)
     
     # Push commit
     git push origin "$CURRENT_BRANCH"
