@@ -242,32 +242,32 @@ fun SongInfoBottomSheet(
                         )
                     }
 
-                    // Botón de Compartir Modificado con altura
-                    FilledTonalIconButton(
-                        modifier = Modifier
-                            .weight(0.25f)
-                            .fillMaxHeight(), // Rellena a la altura de la Row
-                        onClick = {
-                            try {
-                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "audio/*" // Tipo MIME para archivos de audio
-                                    putExtra(Intent.EXTRA_STREAM, song.contentUriString.toUri())
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Necesario para URIs de contenido
+                    // Share button - only for local songs
+                    if (!song.path.isEmpty() && !song.id.startsWith("saavn:")) {
+                        FilledTonalIconButton(
+                            modifier = Modifier
+                                .weight(0.25f)
+                                .fillMaxHeight(),
+                            onClick = {
+                                try {
+                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "audio/*"
+                                        putExtra(Intent.EXTRA_STREAM, song.contentUriString.toUri())
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    context.startActivity(Intent.createChooser(shareIntent, "Share Song File Via"))
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Could not share song: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
                                 }
-                                // Inicia el chooser para que el usuario elija la app para compartir
-                                context.startActivity(Intent.createChooser(shareIntent, "Share Song File Via"))
-                            } catch (e: Exception) {
-                                // Manejar el caso donde la URI es inválida o no hay app para compartir
-                                Toast.makeText(context, "Could not share song: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                            }
-                        },
-                        shape = CircleShape // Mantenemos CircleShape para el botón de compartir
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize),
-                            imageVector = Icons.Rounded.Share,
-                            contentDescription = "Share song file"
-                        )
+                            },
+                            shape = CircleShape
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize),
+                                imageVector = Icons.Rounded.Share,
+                                contentDescription = "Share song file"
+                            )
+                        }
                     }
                 }
 
@@ -348,32 +348,35 @@ fun SongInfoBottomSheet(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            FilledTonalButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 66.dp),
-                colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                ),
-                shape = CircleShape,
-                onClick = {
-                    (context as? Activity)?.let { activity ->
-                        onDeleteFromDevice(activity, song) { result ->
-                            if (result) {
-                                removeFromListTrigger()
-                                onDismiss()
+            // Delete from Device button - only for local songs
+            if (!song.path.isEmpty() && !song.id.startsWith("saavn:")) {
+                FilledTonalButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 66.dp),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    ),
+                    shape = CircleShape,
+                    onClick = {
+                        (context as? Activity)?.let { activity ->
+                            onDeleteFromDevice(activity, song) { result ->
+                                if (result) {
+                                    removeFromListTrigger()
+                                    onDismiss()
+                                }
                             }
                         }
                     }
+                ) {
+                    Icon(
+                        Icons.Default.DeleteForever,
+                        contentDescription = "Delete from device icon"
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Delete From Device")
                 }
-            ) {
-                Icon(
-                    Icons.Default.DeleteForever,
-                    contentDescription = "Delete from device icon"
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("Delete From Device")
             }
 
                 Spacer(modifier = Modifier.height(14.dp))
@@ -415,13 +418,17 @@ fun SongInfoBottomSheet(
                         supportingContent = { Text(song.displayArtist) },
                         leadingContent = { Icon(Icons.Rounded.Person, contentDescription = "Artist icon") }
                     )
-                    ListItem(
-                        modifier = Modifier
-                            .clip(shape = listItemShape),
-                        headlineContent = { Text("Path") },
-                        supportingContent = { Text(song.path) },
-                        leadingContent = { Icon(Icons.Rounded.AudioFile, contentDescription = "File icon") }
-                    )
+                    
+                    // Path - only for local songs
+                    if (!song.path.isEmpty() && !song.id.startsWith("saavn:")) {
+                        ListItem(
+                            modifier = Modifier
+                                .clip(shape = listItemShape),
+                            headlineContent = { Text("Path") },
+                            supportingContent = { Text(song.path) },
+                            leadingContent = { Icon(Icons.Rounded.AudioFile, contentDescription = "File icon") }
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(32.dp))
             }
