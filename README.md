@@ -117,11 +117,34 @@
 
 ### Prerequisites
 
-- Android Studio Ladybug | 2024.2.1 or newer
-- Android SDK 29+
-- JDK 11+
+- Android Studio Ladybug | 2024.2.1 or newer (for IDE development)
+- Android SDK 29+ (for building)
+- JDK 11+ (required)
 
-### Installation
+### Building APK
+
+📦 **Want to build an APK?** Check out our comprehensive [BUILD_APK.md](BUILD_APK.md) guide!
+
+**Quick build via command line:**
+```sh
+# Clone the repository
+git clone https://github.com/Dcode9/PixelPlayer.git
+cd PixelPlayer
+
+# Build debug APK (Linux/Mac)
+./gradlew assembleDebug
+
+# Build debug APK (Windows)
+gradlew.bat assembleDebug
+
+# Or use the automated build script
+./build-apk.sh debug     # Linux/Mac
+build-apk.bat debug      # Windows
+```
+
+The APK will be at: `app/build/outputs/apk/debug/app-debug.apk`
+
+### Development Setup (Android Studio)
 
 1. **Clone the repository**
    ```sh
