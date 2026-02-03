@@ -401,4 +401,50 @@ object AppModule {
     ): ArtistImageRepository {
         return ArtistImageRepository(deezerApiService, musicDao)
     }
+
+    /**
+     * Provee una instancia de Retrofit para la API de JioSaavn.
+     */
+    @Provides
+    @Singleton
+    @JioSaavnRetrofit
+    fun provideJioSaavnRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        // Create a custom OkHttpClient for JioSaavn with required headers
+        val jioSaavnClient = okHttpClient.newBuilder()
+            .addInterceptor { chain ->
+                val originalRequest = chain.request()
+                val requestWithHeaders = originalRequest.newBuilder()
+                    .header("User-Agent", "PixelPlayer/1.0 (Android)")
+                    .header("Referer", "https://www.jiosaavn.com/")
+                    .build()
+                chain.proceed(requestWithHeaders)
+            }
+            .build()
+        
+        return Retrofit.Builder()
+            .baseUrl("https://jiosaavn-m02hizdkx-dcode9s-projects.vercel.app/")
+            .client(jioSaavnClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    /**
+     * Provee el servicio de la API de JioSaavn.
+     */
+    @Provides
+    @Singleton
+    fun provideJioSaavnApiService(@JioSaavnRetrofit retrofit: Retrofit): com.theveloper.pixelplay.data.network.jiosaavn.JioSaavnApiService {
+        return retrofit.create(com.theveloper.pixelplay.data.network.jiosaavn.JioSaavnApiService::class.java)
+    }
+
+    /**
+     * Provee el repositorio de JioSaavn para música en la nube.
+     */
+    @Provides
+    @Singleton
+    fun provideJioSaavnRepository(
+        apiService: com.theveloper.pixelplay.data.network.jiosaavn.JioSaavnApiService
+    ): com.theveloper.pixelplay.data.network.jiosaavn.JioSaavnRepository {
+        return com.theveloper.pixelplay.data.network.jiosaavn.JioSaavnRepository(apiService)
+    }
 }
