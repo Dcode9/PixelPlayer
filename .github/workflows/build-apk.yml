@@ -3,6 +3,8 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -36,8 +38,98 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleDebug
 
-      - name: Upload APK artifact
+      - name: Build release APK
+        run: ./gradlew assembleRelease
+
+      - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: PixelPlay-debug-apk
+          name: PixelPlayer-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload release APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PixelPlayer-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download debug APK
+        uses: actions/download-artifact@v4
+        with:
+          name: PixelPlayer-debug-apk
+          path: ./apks
+
+      - name: Download release APK
+        uses: actions/download-artifact@v4
+        with:
+          name: PixelPlayer-release-apk
+          path: ./apks
+
+      - name: Get version from gradle.properties
+        id: version
+        run: |
+          VERSION_NAME=$(grep "APP_VERSION_NAME" gradle.properties | cut -d'=' -f2)
+          VERSION_CODE=$(grep "APP_VERSION_CODE" gradle.properties | cut -d'=' -f2)
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+
+      - name: Rename APK files
+        run: |
+          mv ./apks/app-debug.apk ./apks/PixelPlayer-${{ steps.version.outputs.version_name }}-debug.apk
+          mv ./apks/app-release.apk ./apks/PixelPlayer-${{ steps.version.outputs.version_name }}-release.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./apks/PixelPlayer-${{ steps.version.outputs.version_name }}-debug.apk
+            ./apks/PixelPlayer-${{ steps.version.outputs.version_name }}-release.apk
+          body: |
+            ## PixelPlayer ${{ steps.version.outputs.version_name }}
+            
+            ### 📦 Download APK
+            
+            Choose the APK that suits your needs:
+            
+            - **Release APK** (Recommended): Optimized build for daily use
+              - File: `PixelPlayer-${{ steps.version.outputs.version_name }}-release.apk`
+              - ProGuard optimization enabled
+              - Smaller file size
+            
+            - **Debug APK**: Development build with debugging enabled
+              - File: `PixelPlayer-${{ steps.version.outputs.version_name }}-debug.apk`
+              - Useful for testing and reporting issues
+              - Larger file size
+            
+            ### 📱 Installation Instructions
+            
+            1. Download the APK file to your Android device
+            2. Open the APK file with a file manager
+            3. If prompted, allow installation from unknown sources
+            4. Follow the on-screen instructions to install
+            
+            ### ℹ️ Build Information
+            
+            - Version: ${{ steps.version.outputs.version_name }}
+            - Version Code: ${{ steps.version.outputs.version_code }}
+            - Built from: ${{ github.ref_name }}
+            - Commit: ${{ github.sha }}
+            
+            ### 📝 Changelog
+            
+            See [CHANGELOG.md](https://github.com/Dcode9/PixelPlayer/blob/main/CHANGELOG.md) for detailed changes.
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version_name, 'beta') || contains(steps.version.outputs.version_name, 'alpha') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
