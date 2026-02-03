@@ -303,7 +303,7 @@ private fun TrendingSongItem(
                             onAddToLibrary()
                         }
                     )
-                    Divider()
+                    HorizontalDivider()
                     DropdownMenuItem(
                         text = { Text("Song info") },
                         leadingIcon = {

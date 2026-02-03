@@ -34,8 +34,8 @@ object JioSaavnMapper {
         // Get artwork URL (choose highest quality)
         val artworkUrl = getBestImageUrl(saavnSong.image)
         
-        // Convert duration from seconds to milliseconds
-        val durationMs = (saavnSong.duration ?: 0) * 1000L
+        // Convert duration from seconds to milliseconds (safe from overflow)
+        val durationMs = (saavnSong.duration?.toLong() ?: 0L) * 1000L
         
         // Year
         val year = saavnSong.year?.toIntOrNull() ?: 0

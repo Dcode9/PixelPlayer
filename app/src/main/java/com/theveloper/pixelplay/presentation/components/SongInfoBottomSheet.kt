@@ -243,7 +243,7 @@ fun SongInfoBottomSheet(
                     }
 
                     // Share button - only for local songs
-                    if (!song.path.isEmpty() && !song.id.startsWith("saavn:")) {
+                    if (song.path.isNotEmpty() && !song.id.startsWith("saavn:")) {
                         FilledTonalIconButton(
                             modifier = Modifier
                                 .weight(0.25f)
@@ -349,7 +349,7 @@ fun SongInfoBottomSheet(
             Spacer(modifier = Modifier.height(10.dp))
 
             // Delete from Device button - only for local songs
-            if (!song.path.isEmpty() && !song.id.startsWith("saavn:")) {
+            if (song.path.isNotEmpty() && !song.id.startsWith("saavn:")) {
                 FilledTonalButton(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -420,7 +420,7 @@ fun SongInfoBottomSheet(
                     )
                     
                     // Path - only for local songs
-                    if (!song.path.isEmpty() && !song.id.startsWith("saavn:")) {
+                    if (song.path.isNotEmpty() && !song.id.startsWith("saavn:")) {
                         ListItem(
                             modifier = Modifier
                                 .clip(shape = listItemShape),
