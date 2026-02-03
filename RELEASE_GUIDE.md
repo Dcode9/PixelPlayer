@@ -6,7 +6,23 @@ This guide explains how to create releases and make APKs available for download.
 
 The repository is configured to automatically build and release APK files when you create a version tag.
 
-### Creating a Release
+### Quick Method: Using the Release Script
+
+The easiest way to create a release is using the provided script:
+
+```bash
+./create-release.sh
+```
+
+This script will:
+- Show current version
+- Prompt for new version name and code
+- Update `gradle.properties`
+- Commit the changes
+- Create and push a git tag
+- Trigger the GitHub Actions workflow
+
+### Manual Method: Creating a Release
 
 1. **Update Version Information**
    
