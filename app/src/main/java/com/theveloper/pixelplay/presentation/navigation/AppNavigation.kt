@@ -40,6 +40,7 @@ import com.theveloper.pixelplay.presentation.screens.StatsScreen
 import com.theveloper.pixelplay.presentation.screens.SettingsScreen
 import com.theveloper.pixelplay.presentation.screens.SettingsCategoryScreen
 import com.theveloper.pixelplay.presentation.screens.EqualizerScreen
+import com.theveloper.pixelplay.presentation.screens.TrendingScreen
 import com.theveloper.pixelplay.presentation.viewmodel.PlayerViewModel
 import com.theveloper.pixelplay.presentation.viewmodel.PlaylistViewModel
 import kotlinx.coroutines.flow.first
@@ -110,6 +111,21 @@ fun AppNavigation(
             ) {
                 ScreenWrapper(navController = navController) {
                     LibraryScreen(navController = navController, playerViewModel = playerViewModel)
+                }
+            }
+            composable(
+                Screen.Trending.route,
+                enterTransition = { enterTransition() },
+                exitTransition = { exitTransition() },
+                popEnterTransition = { popEnterTransition() },
+                popExitTransition = { popExitTransition() },
+            ) {
+                ScreenWrapper(navController = navController) {
+                    TrendingScreen(
+                        paddingValues = paddingValues,
+                        playerViewModel = playerViewModel,
+                        navController = navController
+                    )
                 }
             }
             composable(

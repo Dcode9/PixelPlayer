@@ -83,7 +83,8 @@ class MusicRepositoryImpl @Inject constructor(
     private val lyricsRepository: LyricsRepository,
     private val songRepository: SongRepository,
     private val favoritesDao: FavoritesDao,
-    private val artistImageRepository: ArtistImageRepository
+    private val artistImageRepository: ArtistImageRepository,
+    private val jioSaavnRepository: com.theveloper.pixelplay.data.network.jiosaavn.JioSaavnRepository
 ) : MusicRepository {
 
     private val directoryScanMutex = Mutex()
@@ -576,4 +577,30 @@ class MusicRepositoryImpl @Inject constructor(
     override suspend fun deleteById(id: Long) {
         musicDao.deleteById(id)
     }
+    
+    // JioSaavn cloud music methods implementation
+    override fun getTrendingSongs(): Flow<List<Song>> = flow {
+        val result = jioSaavnRepository.getTrendingSongs()
+        result.onSuccess { songs ->
+            emit(songs)
+        }.onFailure { error ->
+            Log.e("MusicRepositoryImpl", "Error fetching trending songs", error)
+            emit(emptyList())
+        }
+    }.flowOn(Dispatchers.IO)
+    
+    override fun searchSongsRemote(query: String, limit: Int): Flow<List<Song>> = flow {
+        if (query.isBlank()) {
+            emit(emptyList())
+            return@flow
+        }
+        
+        val result = jioSaavnRepository.searchSongs(query, limit)
+        result.onSuccess { songs ->
+            emit(songs)
+        }.onFailure { error ->
+            Log.e("MusicRepositoryImpl", "Error searching songs: $query", error)
+            emit(emptyList())
+        }
+    }.flowOn(Dispatchers.IO)
 }

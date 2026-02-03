@@ -195,4 +195,19 @@ interface MusicRepository {
     fun getMusicFolders(): Flow<List<com.theveloper.pixelplay.data.model.MusicFolder>>
 
     suspend fun deleteById(id: Long)
+    
+    // JioSaavn cloud music methods
+    /**
+     * Fetches trending songs from JioSaavn cloud service
+     * @return Flow emitting a list of trending songs from the cloud
+     */
+    fun getTrendingSongs(): Flow<List<Song>>
+    
+    /**
+     * Searches for songs on JioSaavn cloud service
+     * @param query Search query
+     * @param limit Maximum number of results (default: 20)
+     * @return Flow emitting a list of songs matching the search query
+     */
+    fun searchSongsRemote(query: String, limit: Int = 20): Flow<List<Song>>
 }

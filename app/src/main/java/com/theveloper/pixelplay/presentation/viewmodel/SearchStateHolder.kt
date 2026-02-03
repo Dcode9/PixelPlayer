@@ -90,9 +90,13 @@ class SearchStateHolder @Inject constructor(
                     return@launch
                 }
 
-                val currentFilter = _selectedSearchFilter.value
+                // Use JioSaavn remote search for cloud music
                 val resultsList = withContext(Dispatchers.IO) {
-                    musicRepository.searchAll(query, currentFilter).first()
+                    val remoteSongs = musicRepository.searchSongsRemote(query, limit = 50).first()
+                    // Convert songs to SearchResultItem
+                    remoteSongs.map { song ->
+                        SearchResultItem.SongItem(song)
+                    }
                 }
 
                 _searchResults.value = resultsList.toImmutableList()
